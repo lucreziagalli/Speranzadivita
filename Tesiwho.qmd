@@ -1,0 +1,196 @@
+---
+title: |
+  \begin{center}
+  {\Large \textbf{ALMA MATER STUDIORUM – UNIVERSITA’ DI BOLOGNA}}\\[1.5cm]
+  {\large DIPARTIMENTO DI SCIENZE STATISTICHE}\\
+  {\large “PAOLO FORTUNATI”}\\[2cm]
+  {\large Corso di Laurea in Scienze Statistiche}\\[2cm]
+  \end{center}
+  \vfill
+  \begin{center}
+  {\Huge \textbf{DETERMINANTI DELLA SPERANZA DI VITA:UN'ANALISI GLOBALE DEGLI EFFETTI DI INQUINAMENTO, ABITUDINI DI CONSUMO E CONDIZIONI SANITARIE}}\\[0.25cm]
+  {\Large Utilizzo Statistico di Banche Dati Online}
+  \end{center}
+  \vfill
+author: "Lucrezia Galli"
+date: "2025-02-20"
+format: 
+  pdf:
+    number-sections: true  # Enables section numbering
+bibliography: biblio.bib  # Link the BibTeX file
+header-includes: |
+  % Set Arial font globally
+  \usepackage{helvet}  
+  \renewcommand{\familydefault}{\sfdefault}  
+
+
+  % Ensure correct document structure
+  \usepackage{titling}
+  \usepackage{array}
+  \usepackage{ragged2e}
+
+  % Define Presentata and Appello sections
+  \newcommand{\presentata}{%
+    \begin{flushleft}
+    \begin{tabular}{ p{7cm} p{7cm} }
+    \textbf{Presentata da:} & \hfill \textbf{Relatore:} \\
+    Lucrezia Galli & \hfill Prof Paolo Verme \\
+    Matricola: 000113963 &  \\
+    \end{tabular}
+    \end{flushleft}
+  }
+  \newcommand{\appello}{%
+    \vfill
+    \begin{center}
+    \textbf{APPELLO I}\\[0.5cm]
+    \textbf{ANNO ACCADEMICO 24 / 25}
+    \end{center}
+  }
+---
+
+
+
+```{r, include=F}
+source("C:/Users/luca galli/OneDrive/Documenti/lucrezia secondo anno/utilizzo banche dati/pacchetti.R")
+```
+ 
+
+```{r setup, include=FALSE}
+#| output: false
+source("C:/Users/luca galli/OneDrive/Documenti/lucrezia secondo anno/utilizzo banche dati/pacchetti.R")
+ifpack(c("sf", "terra", "spData","readxl", "rnaturalearth", "rnaturalearthdata", "tmap", "wbstats", "tidyverse", "devtools", "httr", "Statamarkdown", "reticulate", "ggplot2", "dplyr", "viridis", "geometry", "jsonlite", "WDI", "worldbank", "countrycode", "corrplot","tidyverse", "tidyr","countrycode", "writexl", "car", "psych",
+         "kableExtra", "knitr", "stargazer"))
+
+```
+
+
+\presentata
+
+\appello
+
+\newpage  
+
+\fontsize{12pt}{14pt} \selectfont  
+
+# Introduction
+
+Analizzare i fattori che influenzano la speranza di vita è essenziale per sviluppare strategie efficaci di sanità pubblica e promuovere il benessere a livello globale. La letteratura esistente ha messo in evidenza il ruolo di variabili socioeconomiche, dell’accesso alle cure mediche e delle abitudini di vita nella determinazione della longevità, ma una visione integrata che consideri contemporaneamente diversi fattori rimane ancora poco esplorata. Questo studio si propone di esaminare l’impatto dell’inquinamento atmosferico, del consumo di alcol e tabacco, della mortalità materna, degli incidenti stradali e delle malattie croniche sulla speranza di vita, fornendo un’analisi completa e approfondita.
+
+# Data
+Il dataset utilizzato per l'analisi non è stato scaricato direttamente da una singola fonte, ma costruito a partire da diversi dataset disponibili nei database della [World Health Organization (WHO)](https://apps.who.int/gho/data/node.main.1?lang=en).  Ogni dataset conteneva una singola variabile osservata per più anni; per garantire coerenza temporale, sono stati selezionati i dati relativi all'anno 2019. Successivamente, le variabili di interesse sono state aggregate in un unico file Excel, creando così una nuova tabella strutturata. Questa è stata poi importata in R per l'analisi statistica.
+
+```{r, include=FALSE}
+who_data <- read_excel("whohealth.xlsx")
+who_data<-who_data[,c(-2)]
+
+#da character a numeric
+who_data <- who_data %>%
+  mutate(across(2:ncol(who_data), ~as.numeric(gsub("[^0-9.-]", "", .))))
+
+str(who_data)
+summary(who_data)
+colMeans(who_data[,-1])
+colnames(who_data)[2]<-'LifeExpatBirth'
+colnames(who_data)[6]<-'Alcohol_Consumption'
+colnames(who_data)[7]<-'Pop_Basic_Drinking_Water'
+```
+
+```{r, echo=FALSE}
+tabella_info <- data.frame(
+  Variabile = c("LifeExpatBirth", "Mortality_30_70_CCDR", "PM25_Annual_Urban", 
+                "Maternal_Mortality_Ratio", "Alcohol_Consumption", "Tobacco_Age_Stand",
+                "Pop_Basic_Drinking_Water", "Road_traffic_injuries"),
+  Descrizione = c("Speranza di vita alla nascita", 
+                  "Probabilità di morire tra i 30 e i 70 anni a causa di malattie croniche","Concentrazione media annua di particolato fine (PM2.5) nell’aria delle aree urbane", 
+                  "Numero di decessi materni per complicazioni legate alla gravidanza o al parto", "Quantità media annua di alcol consumata dalla popolazione di età superiore ai 15 anni","Percentuale della popolazione che fa uso di prodotti a base di tabacco","Percentuale della popolazione con accesso a servizi idrici di base", "Tasso di mortalità dovuto a incidenti stradali"),
+  Unita_di_misura = c("Anni", "Tasso (%)", "µg/m³", 
+                      "Decessi per 100.000 nati vivi", "Litri pro capite", 
+                      "Percentuale (%)", "Percentuale (%)",   "Tasso per 100.000 abitanti")
+)
+
+
+kable(tabella_info, caption = "Descrizione delle variabili chiave del dataset", 
+      align = "lcc", booktabs = TRUE) %>%
+  kable_styling(latex_options = c("striped", "hold_position")) %>%
+  column_spec(2, width = "7cm") %>%
+  column_spec(3, width = "3cm")
+
+
+```
+# Methodology
+Per esaminare i fattori che influenzano l'aspettativa di vita alla nascita, è stato adottato un modello di regressione lineare multipla. Questo metodo consente di stimare l'effetto di più variabili esplicative sulla variabile dipendente, tenendo costanti gli altri fattori. Il modello è stato applicato ai dati della World Health Organization (WHO) e include variabili legate alla salute pubblica, all'ambiente e agli stili di vita. L'obiettivo è valutare l'impatto di indicatori come il tasso di mortalità prematura (Mortality_30_70_CCDR), il livello di inquinamento atmosferico urbano (PM25_Annual_Urban) e l'accesso all'acqua potabile di base (Pop_Basic_Drinking_Water) sull'aspettativa di vita nei diversi Paesi.
+Il modello di regressione è il seguente:
+\
+\resizebox{\textwidth}{!}{$
+LifeExp = \beta_0 + \beta_1 \cdot Mort3070 + \beta_2 \cdot PM25 + 
+\beta_3 \cdot MatMort + \beta_4 \cdot AlcCons + 
+\beta_5 \cdot DrinkWater + \beta_6 \cdot RoadInj + 
+\beta_7 \cdot TobUse + \epsilon
+$}
+\
+dove *LifeExpatBirth* rappresenta l'aspettativa di vita alla nascita, mentre le altre variabili sono i fattori esplicativi. Il termine *ϵ* indica l'errore residuo del modello. La bontà del modello è stata valutata attraverso il coefficiente di determinazione (R²), mentre il Variance Inflation Factor (VIF) è stato calcolato per individuare eventuali problemi di multicollinearità. Inoltre, sono stati condotti test diagnostici sui residui per verificare la normalità e l’assenza di eteroschedasticità.
+
+# Results
+```{r, echo=FALSE}
+lmod<-lm(LifeExpatBirth~ Mortality_30_70_CCDR+
+           PM25_Annual_Urban+Maternal_Mortality_Ratio+
+           Alcohol_Consumption+Pop_Basic_Drinking_Water+
+           Road_traffic_injuries+Tobacco_Age_Stand, data=who_data)
+summary(lmod)
+```
+
+
+```{r}
+vif(lmod)
+```
+Il modello di regressione lineare multipla utilizzato ha spiegato il 91,98% della variazione nell'aspettativa di vita alla nascita (LifeExpatBirth), come indicato dal valore di R² (0.9198). Il test F ha restituito un valore di 257.2 con un p-value inferiore a 2.2e-16, confermando la significatività globale del modello. Questi risultati suggeriscono che le variabili indipendenti selezionate hanno un forte potere esplicativo nel determinare l’aspettativa di vita.
+```{r, echo=FALSE}
+stargazer(lmod, type = "text", title = "Tabella 1: Coefficienti della regressione", digits = 3)
+```
+
+## Interpretazione dei Coefficienti
+
+Dai coefficienti della regressione, si osserva che l’aumento del tasso di mortalità tra i 30 e i 70 anni (Mortality_30_70_CCDR) è associato a una riduzione significativa dell’aspettativa di vita (-0.512 per unità di incremento, p<0.001). Anche la qualità dell’aria (PM25_Annual_Urban) incide negativamente, seppur con un effetto più contenuto (-0.027, p<0.05). Variabili come il tasso di mortalità materna (Maternal_Mortality_Ratio) e gli incidenti stradali (Road_traffic_injuries) hanno un impatto negativo significativo. Al contrario, un miglior accesso all’acqua potabile (Pop_Basic_Drinking_Water) è positivamente correlato con l’aspettativa di vita. L’uso di tabacco (Tobacco_Age_Stand) mostra un effetto positivo, sebbene meno marcato.
+
+## Multicollinearità e Robustezza del Modello
+
+Per verificare la robustezza del modello, sono stati calcolati i valori VIF per ogni variabile indipendente. Nessuna variabile ha un VIF superiore a 5, indicando l’assenza di gravi problemi di multicollinearità.
+```{r}
+vif_table <- data.frame(Variable = names(vif(lmod)), VIF = vif(lmod))
+```
+
+
+## Visualizzazione dei risultati
+```{r}
+plot(lmod$fitted.values, resid(lmod),
+     xlab = "Valori Predetti",
+     ylab = "Residui",
+     main = "Figura 1: Residui vs. Valori Predetti",
+     pch = 20, col = "blue")
+abline(h = 0, col = "red", lwd = 2)
+```
+
+```{r}
+plot(who_data$Mortality_30_70_CCDR, who_data$LifeExpatBirth,
+     xlab = "Mortalità 30-70 Anni",
+     ylab = "Aspettativa di Vita alla Nascita",
+     main = "Figura 2: Relazione tra Mortalità e Aspettativa di Vita",
+     pch = 20, col = "darkgreen")
+abline(lm(LifeExpatBirth ~ Mortality_30_70_CCDR, data = who_data), col = "red", lwd = 2)
+```
+
+
+
+This study is based on statistical analysis methods presented by Smith [@smith2020] and recent developments in data science discussed by Jones and Brown [@jones2018].
+
+# Machine Learning in Healthcare
+
+Lee and White [@lee2019] highlighted key advancements in AI-driven healthcare, while Williams [@williams2021] examined societal impacts of big data.
+
+# Online Resources
+
+For a general understanding of statistical learning, see Doe’s online guide [@doe2023].
+
+# Conclusions
+
+# References
