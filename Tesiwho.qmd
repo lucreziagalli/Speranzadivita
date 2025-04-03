@@ -1,23 +1,22 @@
 ---
 title: |
   \begin{center}
-  {\Large \textbf{ALMA MATER STUDIORUM – UNIVERSITA’ DI BOLOGNA}}\\[1.5cm]
+  {\Large \textbf{ALMA MATER STUDIORUM – UNIVERSITA’ DI BOLOGNA}}\\[1cm]
   {\large DIPARTIMENTO DI SCIENZE STATISTICHE}\\
-  {\large “PAOLO FORTUNATI”}\\[2cm]
+  {\large “PAOLO FORTUNATI”}\\[1cm]
   {\large Corso di Laurea in Scienze Statistiche}\\[2cm]
   \end{center}
-  \vfill
   \begin{center}
-  {\Huge \textbf{DETERMINANTI DELLA SPERANZA DI VITA:UN'ANALISI GLOBALE DEGLI EFFETTI DI INQUINAMENTO, ABITUDINI DI CONSUMO E CONDIZIONI SANITARIE}}\\[0.25cm]
-  {\Large Utilizzo Statistico di Banche Dati Online}
+  {\Large \textbf{DETERMINANTI DELLA SPERANZA DI VITA:UN'ANALISI GLOBALE DEGLI EFFETTI DI INQUINAMENTO, ABITUDINI DI CONSUMO E CONDIZIONI SANITARIE}}\\[0.5cm]
+  {\Large\textit{ Utilizzo Statistico di Banche Dati Online}}
   \end{center}
-  \vfill
+
 author: "Lucrezia Galli"
-date: "2025-02-20"
+date: "2025-04-06"
 format: 
   pdf:
     number-sections: true  # Enables section numbering
-bibliography: biblio.bib  # Link the BibTeX file
+bibliography: biblio.bib  
 header-includes: |
   % Set Arial font globally
   \usepackage{helvet}  
@@ -35,12 +34,12 @@ header-includes: |
     \begin{tabular}{ p{7cm} p{7cm} }
     \textbf{Presentata da:} & \hfill \textbf{Relatore:} \\
     Lucrezia Galli & \hfill Prof Paolo Verme \\
-    Matricola: 000113963 &  \\
+    Matricola: 0001113963 &  \\
     \end{tabular}
     \end{flushleft}
   }
   \newcommand{\appello}{%
-    \vfill
+    \vspace{1cm}
     \begin{center}
     \textbf{APPELLO I}\\[0.5cm]
     \textbf{ANNO ACCADEMICO 24 / 25}
@@ -58,8 +57,7 @@ source("C:/Users/luca galli/OneDrive/Documenti/lucrezia secondo anno/utilizzo ba
 ```{r setup, include=FALSE}
 #| output: false
 source("C:/Users/luca galli/OneDrive/Documenti/lucrezia secondo anno/utilizzo banche dati/pacchetti.R")
-ifpack(c("sf", "terra", "spData","readxl", "rnaturalearth", "rnaturalearthdata", "tmap", "wbstats", "tidyverse", "devtools", "httr", "Statamarkdown", "reticulate", "ggplot2", "dplyr", "viridis", "geometry", "jsonlite", "WDI", "worldbank", "countrycode", "corrplot","tidyverse", "tidyr","countrycode", "writexl", "car", "psych",
-         "kableExtra", "knitr", "stargazer"))
+ifpack(c("readxl", "dplyr", "knitr", "kableExtra", "ggplot2", "viridis", "car","tidyverse", "sf", "countrycode", "rnaturalearth", "rnaturalearthdata"))
 
 ```
 
@@ -74,16 +72,15 @@ ifpack(c("sf", "terra", "spData","readxl", "rnaturalearth", "rnaturalearthdata",
 
 # Introduction
 
-Analizzare i fattori che influenzano la speranza di vita è essenziale per sviluppare strategie efficaci di sanità pubblica e promuovere il benessere a livello globale. La letteratura esistente ha messo in evidenza il ruolo di variabili socioeconomiche, dell’accesso alle cure mediche e delle abitudini di vita nella determinazione della longevità, ma una visione integrata che consideri contemporaneamente diversi fattori rimane ancora poco esplorata. Questo studio si propone di esaminare l’impatto dell’inquinamento atmosferico, del consumo di alcol e tabacco, della mortalità materna, degli incidenti stradali e delle malattie croniche sulla speranza di vita, fornendo un’analisi completa e approfondita.
+Analizzare i fattori che influenzano la speranza di vita è essenziale per sviluppare strategie efficaci di sanità pubblica e promuovere il benessere a livello globale. Numerosi studi hanno evidenziato come variabili socioeconomiche, accesso alle cure mediche e abitudini di vita influenzino significativamente la longevità. Tuttavia, l’approccio integrato che considera la complessa interazione di questi fattori è ancora poco esplorato [@Esposito2024]. Ricerche recenti hanno mostrato che percorsi socioeconomici svantaggiati possano accelerare l’invecchiamento biologico, ma che interventi mirati sugli stili di vita possano mitigarne gli effetti negativi. Questo studio esplora l’impatto dell’inquinamento atmosferico, del consumo di alcol e tabacco, della mortalità materna, degli incidenti stradali e delle malattie croniche sulla speranza di vita, fornendo un’analisi completa e approfondita.
 
 # Data
-Il dataset utilizzato per l'analisi non è stato scaricato direttamente da una singola fonte, ma costruito a partire da diversi dataset disponibili nei database della [World Health Organization (WHO)](https://apps.who.int/gho/data/node.main.1?lang=en).  Ogni dataset conteneva una singola variabile osservata per più anni; per garantire coerenza temporale, sono stati selezionati i dati relativi all'anno 2019. Successivamente, le variabili di interesse sono state aggregate in un unico file Excel, creando così una nuova tabella strutturata. Questa è stata poi importata in R per l'analisi statistica.
+Il dataset utilizzato per l'analisi non è stato scaricato direttamente da una singola fonte, ma costruito a partire da diversi dataset disponibili nei database della [World Health Organization (WHO)](https://apps.who.int/gho/data/node.main.1?lang=en),selezionando i dati del 2019 per coerenza temporale. Successivamente, le variabili di interesse sono state aggregate in un unico file Excel e poi importate in R per l'analisi statistica.
 
 ```{r, include=FALSE}
 who_data <- read_excel("whohealth.xlsx")
 who_data<-who_data[,c(-2)]
 
-#da character a numeric
 who_data <- who_data %>%
   mutate(across(2:ncol(who_data), ~as.numeric(gsub("[^0-9.-]", "", .))))
 
@@ -101,24 +98,21 @@ tabella_info <- data.frame(
                 "Maternal_Mortality_Ratio", "Alcohol_Consumption", "Tobacco_Age_Stand",
                 "Pop_Basic_Drinking_Water", "Road_traffic_injuries"),
   Descrizione = c("Speranza di vita alla nascita", 
-                  "Probabilità di morire tra i 30 e i 70 anni a causa di malattie croniche","Concentrazione media annua di particolato fine (PM2.5) nell’aria delle aree urbane", 
-                  "Numero di decessi materni per complicazioni legate alla gravidanza o al parto", "Quantità media annua di alcol consumata dalla popolazione di età superiore ai 15 anni","Percentuale della popolazione che fa uso di prodotti a base di tabacco","Percentuale della popolazione con accesso a servizi idrici di base", "Tasso di mortalità dovuto a incidenti stradali"),
+                  "Probabilità di morire tra i 30 e i 70 anni a causa di malattie croniche","Concentrazione media annua di PM2.5 nelle aree urbane","Decessi materni per complicazioni legate alla gravidanza", "Consumo medio di alcol della popolazione (>15 anni)","Percentuale di consumatori di tabacco","Accesso ai servizi idrici di base", "Mortalità dovuta a incidenti stradali"),
   Unita_di_misura = c("Anni", "Tasso (%)", "µg/m³", 
                       "Decessi per 100.000 nati vivi", "Litri pro capite", 
                       "Percentuale (%)", "Percentuale (%)",   "Tasso per 100.000 abitanti")
 )
 
-
-kable(tabella_info, caption = "Descrizione delle variabili chiave del dataset", 
-      align = "lcc", booktabs = TRUE) %>%
-  kable_styling(latex_options = c("striped", "hold_position")) %>%
-  column_spec(2, width = "7cm") %>%
-  column_spec(3, width = "3cm")
-
-
+knitr::kable(tabella_info, caption = "Descrizione delle variabili chiave del dataset", 
+             align = "lcc", booktabs = TRUE) %>%
+  kableExtra::kable_styling(latex_options = c("striped", "hold_position")) %>%
+  kableExtra::column_spec(2, width = "7cm") %>%
+  kableExtra::column_spec(3, width = "3cm")
 ```
+
 # Methodology
-Per esaminare i fattori che influenzano l'aspettativa di vita alla nascita, è stato adottato un modello di regressione lineare multipla. Questo metodo consente di stimare l'effetto di più variabili esplicative sulla variabile dipendente, tenendo costanti gli altri fattori. Il modello è stato applicato ai dati della World Health Organization (WHO) e include variabili legate alla salute pubblica, all'ambiente e agli stili di vita. L'obiettivo è valutare l'impatto di indicatori come il tasso di mortalità prematura (Mortality_30_70_CCDR), il livello di inquinamento atmosferico urbano (PM25_Annual_Urban) e l'accesso all'acqua potabile di base (Pop_Basic_Drinking_Water) sull'aspettativa di vita nei diversi Paesi.
+Per esaminare i fattori che influenzano l'aspettativa di vita alla nascita, è stato adottato un modello di regressione lineare multipla, che stima l'effetto di più variabili esplicative, mantendendo costanti gli altri fattori.
 Il modello di regressione è il seguente:
 \
 \resizebox{\textwidth}{!}{$
@@ -128,40 +122,85 @@ LifeExp = \beta_0 + \beta_1 \cdot Mort3070 + \beta_2 \cdot PM25 +
 \beta_7 \cdot TobUse + \epsilon
 $}
 \
-dove *LifeExpatBirth* rappresenta l'aspettativa di vita alla nascita, mentre le altre variabili sono i fattori esplicativi. Il termine *ϵ* indica l'errore residuo del modello. La bontà del modello è stata valutata attraverso il coefficiente di determinazione (R²), mentre il Variance Inflation Factor (VIF) è stato calcolato per individuare eventuali problemi di multicollinearità. Inoltre, sono stati condotti test diagnostici sui residui per verificare la normalità e l’assenza di eteroschedasticità.
+dove *LifeExpatBirth* rappresenta l'aspettativa di vita alla nascita e le altre variabili sono i fattori esplicativi. Il termine $\epsilon$ indica l'errore residuo del modello.
+Il codice utilizzato per questa analisi è stato gestito e versionato tramite GitHub.  
+Il repository è disponibile al seguente link: [GitHub Repository](https://github.com/lucreziagalli/Speranzadivita/blob/master/Tesiwho.qmd).
+
 
 # Results
+
+## Effetti delle variabili sulla speranza di vita
 ```{r, echo=FALSE}
-lmod<-lm(LifeExpatBirth~ Mortality_30_70_CCDR+
-           PM25_Annual_Urban+Maternal_Mortality_Ratio+
-           Alcohol_Consumption+Pop_Basic_Drinking_Water+
-           Road_traffic_injuries+Tobacco_Age_Stand, data=who_data)
-summary(lmod)
-```
+lmod<-lm(LifeExpatBirth~ Mortality_30_70_CCDR+PM25_Annual_Urban+Maternal_Mortality_Ratio+Alcohol_Consumption+Pop_Basic_Drinking_Water+Road_traffic_injuries+Tobacco_Age_Stand, data=who_data)
 
 
-```{r}
-vif(lmod)
+results_table <- as.data.frame(summary(lmod)$coefficients)
+
+results_table <- tibble::rownames_to_column(results_table, var = "Variable")
+
+
+kable(results_table, caption = "Risultati del Modello Multiplo", digits = 3)
+
 ```
-Il modello di regressione lineare multipla utilizzato ha spiegato il 91,98% della variazione nell'aspettativa di vita alla nascita (LifeExpatBirth), come indicato dal valore di R² (0.9198). Il test F ha restituito un valore di 257.2 con un p-value inferiore a 2.2e-16, confermando la significatività globale del modello. Questi risultati suggeriscono che le variabili indipendenti selezionate hanno un forte potere esplicativo nel determinare l’aspettativa di vita.
+
 ```{r, echo=FALSE}
-stargazer(lmod, type = "text", title = "Tabella 1: Coefficienti della regressione", digits = 3)
+c(R2=summary(lmod)$r.squared, maxvif=max(vif(lmod)))
 ```
 
-## Interpretazione dei Coefficienti
+Il modello di regressione ha un R² di 0.9198, indicando che il 91.98% della variabilità della speranza di vita è spiegata dalle variabili incluse. La mortalità tra i 30 e i 70 anni (-0.512, p < 0.001), la mortalità materna (-0.007, p < 0.001), l'inquinamento atmosferico (-0.027, p = 0.032) e gli incidenti stradali (-0.124, p < 0.001) hanno un impatto negativo significativo. L'accesso ai servizi idrici (+0.104, p < 0.001) è associato a un aumento della speranza di vita. Il consumo di tabacco (+0.054, p = 0.004) mostra un effetto positivo inaspettato, mentre l'alcol non è significativo (-0.031, p = 0.519). 
+Nonostante l'R² elevato, i VIF (tutti inferiori a 5) confermano l'assenza di multicollinearità e la stabilità delle stime del modello, evidenziando l'impatto delle condizioni sanitarie e ambientali sulla longevità.
 
-Dai coefficienti della regressione, si osserva che l’aumento del tasso di mortalità tra i 30 e i 70 anni (Mortality_30_70_CCDR) è associato a una riduzione significativa dell’aspettativa di vita (-0.512 per unità di incremento, p<0.001). Anche la qualità dell’aria (PM25_Annual_Urban) incide negativamente, seppur con un effetto più contenuto (-0.027, p<0.05). Variabili come il tasso di mortalità materna (Maternal_Mortality_Ratio) e gli incidenti stradali (Road_traffic_injuries) hanno un impatto negativo significativo. Al contrario, un miglior accesso all’acqua potabile (Pop_Basic_Drinking_Water) è positivamente correlato con l’aspettativa di vita. L’uso di tabacco (Tobacco_Age_Stand) mostra un effetto positivo, sebbene meno marcato.
 
-## Multicollinearità e Robustezza del Modello
-
-Per verificare la robustezza del modello, sono stati calcolati i valori VIF per ogni variabile indipendente. Nessuna variabile ha un VIF superiore a 5, indicando l’assenza di gravi problemi di multicollinearità.
-```{r}
-vif_table <- data.frame(Variable = names(vif(lmod)), VIF = vif(lmod))
+## Relazione tra mortalità prematura e speranza di vita
+Nel modello lineare che ho stimato per analizzare i fattori che influenzano la speranza di vita alla nascita, la variabile più significativa è risultata Mortality_30_70_CDDR, ovvero la probabilità di morte tra i 30 e i 70 anni per cause croniche. Questo è stato determinato tramite l'analisi dei p-value dei coefficienti del modello.
+Per esplorare meglio la relazione tra Mortality_30_70_CDDR e LifeExpatBirth, ho creato un grafico a dispersione con una retta di regressione.
+```{r, include=FALSE}
+coeff_table <- summary(lmod)$coefficients[-1,]
+most_significant <- which.min(coeff_table[, 4])  
+coeff_table[most_significant, , drop = FALSE]
 ```
+
+
+```{r, echo=FALSE}
+ggplot(who_data, aes(x = Mortality_30_70_CCDR, y = LifeExpatBirth)) +
+  geom_point(alpha = 0.6, color = "blue") +  # Punti di dispersione
+  geom_smooth(method = "lm", color = "red") +    # Retta di regressione
+  labs(title = "Relazione tra Mortalità (30-70 anni) e Speranza di Vita",
+       x = "Probabilità di morte (30-70 anni)",
+       y = "Speranza di vita (anni)") +
+  theme_minimal()
+
+
+```
+Il grafico mostra chiaramente una relazione negativa: all'aumentare della probabilità di morte tra i 30 e i 70 anni, la speranza di vita alla nascita diminuisce. Questo è coerente con l’aspettativa che una maggiore mortalità in questa fascia d’età riduca la durata media della vita.
+
+La retta di regressione (in rosso) conferma questa tendenza negativa, mentre l'area grigia rappresenta l’incertezza nelle stime. La distribuzione dei punti suggerisce una relazione piuttosto forte tra le due variabili, confermando l'importanza di Mortality_30_70_CCDR come predittore chiave della speranza di vita.
+
+## Distribuzione della speranza di vita per continente
+
+Per esplorare le differenze nella speranza di vita alla nascita tra i vari continenti, è stata realizzata una mappa tematica. Questa visualizzazione consente di apprezzare chiaramente le disparità tra le diverse aree geografiche, offrendo una rappresentazione immediata dei valori e facilitando il confronto tra le regioni del mondo.
+```{r, echo=FALSE}
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+who_data <- who_data %>% mutate(iso3=countrycode(Country, origin = "country.name",destination = "iso3c"))
+
+world_data <- left_join(world, who_data, by = c("iso_a3" = "iso3"))
+
+  ggplot(world_data) +
+    geom_sf(aes(fill =LifeExpatBirth))+ 
+    scale_fill_viridis_c(option = "plasma", na.value='white') +
+    labs(title = "Speranza di vita alla nascita nel mondo",
+         fill = "Anni") +
+    theme_minimal()
+
+```
+
+La mappa offre una rappresentazione visiva immediata delle disuguaglianze nella speranza di vita alla nascita tra i continenti. Le aree con valori più bassi, come l'Africa subsahariana, sono evidenziate con tonalità di viola scuro, mentre le regioni con speranze di vita più alte, come Nord America, Europa e Australia, sono contrassegnate da colori più caldi come il giallo. Questo contrasto cromatico rende facile identificare le disparità globali, facilitando l'interpretazione delle differenze regionali nella speranza di vita.
 
 
 ## Visualizzazione dei risultati
-```{r}
+Il grafico "Residui vs. Valori Predetti" è uno strumento fondamentale per valutare l'adeguatezza del modello di regressione lineare. Nel grafico, i residui sono rappresentati rispetto ai valori predetti dal modello, consentendo di osservare eventuali schemi sistematici o irregolarità.
+```{r, echo=FALSE}
 plot(lmod$fitted.values, resid(lmod),
      xlab = "Valori Predetti",
      ylab = "Residui",
@@ -169,28 +208,13 @@ plot(lmod$fitted.values, resid(lmod),
      pch = 20, col = "blue")
 abline(h = 0, col = "red", lwd = 2)
 ```
-
-```{r}
-plot(who_data$Mortality_30_70_CCDR, who_data$LifeExpatBirth,
-     xlab = "Mortalità 30-70 Anni",
-     ylab = "Aspettativa di Vita alla Nascita",
-     main = "Figura 2: Relazione tra Mortalità e Aspettativa di Vita",
-     pch = 20, col = "darkgreen")
-abline(lm(LifeExpatBirth ~ Mortality_30_70_CCDR, data = who_data), col = "red", lwd = 2)
-```
-
-
-
-This study is based on statistical analysis methods presented by Smith [@smith2020] and recent developments in data science discussed by Jones and Brown [@jones2018].
-
-# Machine Learning in Healthcare
-
-Lee and White [@lee2019] highlighted key advancements in AI-driven healthcare, while Williams [@williams2021] examined societal impacts of big data.
-
-# Online Resources
-
-For a general understanding of statistical learning, see Doe’s online guide [@doe2023].
+Osservando il grafico, i residui si distribuiscono in modo abbastanza casuale intorno alla linea orizzontale a zero, senza pattern evidenti. Questo supporta l’ipotesi di omoschedasticità e indica che il modello non esclude informazioni rilevanti. Tuttavia, si nota una leggera concentrazione di residui positivi per valori predetti più alti, suggerendo una possibile sottostima della speranza di vita in questi casi. Nonostante questa lieve distorsione, il modello appare complessivamente adeguato.
 
 # Conclusions
+Questo studio ha esaminato in modo integrato l'impatto di fattori ambientali, sanitari e comportamentali sulla speranza di vita, colmando una lacuna nella letteratura. I risultati mostrano che la mortalità prematura, l'inquinamento atmosferico e gli incidenti stradali hanno un effetto negativo significativo, mentre l’accesso ai servizi idrici di base è associato a una maggiore longevità. Il modello adottato ha spiegato gran parte della variabilità osservata, confermando la necessità di strategie di sanità pubblica mirate per ridurre i principali fattori di rischio e migliorare il benessere globale.
 
 # References
+
+World Health Organization. (2025). *Global Health Observatory data: Health workforce statistics*. World Health Organization. Recuperato da [https://apps.who.int/gho/data/node.main?showonly=HWF](https://apps.who.int/gho/data/node.main?showonly=HWF)
+
+
