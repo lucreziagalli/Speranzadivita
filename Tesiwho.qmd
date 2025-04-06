@@ -162,7 +162,7 @@ coeff_table[most_significant, , drop = FALSE]
 ggplot(who_data, aes(x = Mortality_30_70_CCDR, y = LifeExpatBirth)) +
   geom_point(alpha = 0.6, color = "blue") +  # Punti di dispersione
   geom_smooth(method = "lm", color = "red") +    # Retta di regressione
-  labs(title = "Relazione tra Mortalità (30-70 anni) e Speranza di Vita",
+  labs(title = "Figura 1: Relazione tra Mortalità (30-70 anni) e Speranza di Vita",
        x = "Probabilità di morte (30-70 anni)",
        y = "Speranza di vita (anni)") +
   theme_minimal()
@@ -185,9 +185,10 @@ world_data <- left_join(world, who_data, by = c("iso_a3" = "iso3"))
   ggplot(world_data) +
     geom_sf(aes(fill =LifeExpatBirth))+ 
     scale_fill_viridis_c(option = "plasma", na.value='white') +
-    labs(title = "Speranza di vita alla nascita nel mondo",
+    labs(title = "Mappa mondiale della speranza di vita alla nascita",
          fill = "Anni") +
-    theme_minimal()
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5))
 
 ```
 
@@ -200,7 +201,7 @@ Il grafico "Residui vs. Valori Predetti" è uno strumento fondamentale per valut
 plot(lmod$fitted.values, resid(lmod),
      xlab = "Valori Predetti",
      ylab = "Residui",
-     main = "Figura 1: Residui vs. Valori Predetti",
+     main = "Figura 2: Residui vs. Valori Predetti",
      pch = 20, col = "blue")
 abline(h = 0, col = "red", lwd = 2)
 ```
