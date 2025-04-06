@@ -7,7 +7,7 @@ title: |
   {\large Corso di Laurea in Scienze Statistiche}\\[2cm]
   \end{center}
   \begin{center}
-  {\Large \textbf{DETERMINANTI DELLA SPERANZA DI VITA:UN'ANALISI GLOBALE DEGLI EFFETTI DI INQUINAMENTO, ABITUDINI DI CONSUMO E CONDIZIONI SANITARIE}}\\[0.5cm]
+  {\Large \textbf{DETERMINANTI DELLA SPERANZA DI VITA: UN'ANALISI GLOBALE DEGLI EFFETTI DI INQUINAMENTO, ABITUDINI DI CONSUMO E CONDIZIONI SANITARIE}}\\[0.5cm]
   {\Large\textit{ Utilizzo Statistico di Banche Dati Online}}
   \end{center}
 
@@ -49,14 +49,11 @@ header-includes: |
 
 
 
-```{r, include=F}
-source("C:/Users/luca galli/OneDrive/Documenti/lucrezia secondo anno/utilizzo banche dati/pacchetti.R")
-```
  
 
 ```{r setup, include=FALSE}
 #| output: false
-source("C:/Users/luca galli/OneDrive/Documenti/lucrezia secondo anno/utilizzo banche dati/pacchetti.R")
+source("pacchetti.R")
 ifpack(c("readxl", "dplyr", "knitr", "kableExtra", "ggplot2", "viridis", "car","tidyverse", "sf", "countrycode", "rnaturalearth", "rnaturalearthdata"))
 
 ```
@@ -173,7 +170,6 @@ ggplot(who_data, aes(x = Mortality_30_70_CCDR, y = LifeExpatBirth)) +
 
 ```
 Il grafico mostra chiaramente una relazione negativa: all'aumentare della probabilità di morte tra i 30 e i 70 anni, la speranza di vita alla nascita diminuisce. Questo è coerente con l’aspettativa che una maggiore mortalità in questa fascia d’età riduca la durata media della vita.
-
 La retta di regressione (in rosso) conferma questa tendenza negativa, mentre l'area grigia rappresenta l’incertezza nelle stime. La distribuzione dei punti suggerisce una relazione piuttosto forte tra le due variabili, confermando l'importanza di Mortality_30_70_CCDR come predittore chiave della speranza di vita.
 
 ## Distribuzione della speranza di vita per continente
